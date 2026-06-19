@@ -13,6 +13,8 @@ const HeroSection = ({ keyword, dispatch, setKeyword, departments, locations, jo
         <h1 className="display-4 fw-bold mb-3">Join Our Team</h1>
         <p className="text-white-50 fs-5 mb-4">
           Discover exciting opportunities and build your career with us
+          <br/>
+          Chào mừng đến với chúng tôi - Nơi bạn có thể khám phá những cơ hội thú vị và xây dựng sự nghiệp của mình cùng chúng tôi
         </p>
 
         <div
@@ -44,7 +46,7 @@ const HeroSection = ({ keyword, dispatch, setKeyword, departments, locations, jo
               <option value="ALL">All Departments</option>
               {departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
-                  {dept.name}
+                  {dept.departmentName}
                 </option>
               ))}
             </Form.Select>

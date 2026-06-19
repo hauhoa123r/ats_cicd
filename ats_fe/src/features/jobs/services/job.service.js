@@ -1,3 +1,4 @@
+import axiosClient from "@/shared/services/axiosClient";
 const jobs = [
     {
         id: 1,
@@ -193,14 +194,6 @@ const jobs = [
     }
 ];
 
-const departments = [
-    {id: 1, name: "Engineering"},
-    {id: 2, name: "Design"},
-    {id: 3, name: "Product Management"},
-    {id: 4, name: "Marketing"},
-    {id: 5, name: "Analytics"},
-];
-
 const locations = [
     "Ho Chi Minh City, Vietnam",
     "Ha Noi, Vietnam",
@@ -219,11 +212,6 @@ const jobService = {
     findAll: async () => {
         return jobs;
     },
-     findAll2: async () => {
-        const promise = fetch('http://localhost:8080/departments');
-
-        return promise;
-    },
     findById: async (id) => {
         return jobs.find((j) => j.id === Number(id));
     },
@@ -240,7 +228,7 @@ const jobService = {
         return fetch("http://localhost:8080/departments");
     },
     getLocations: async () => {
-        return locations;
+        return axiosClient.get("/api/v1/locations");
     },
     getJobTypes: async () => {
         return jobTypes;

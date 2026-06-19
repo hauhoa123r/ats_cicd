@@ -49,7 +49,7 @@ const AdminManageDepartmentPage = () => {
 
   async function fetchDepartments(currentPage) {
     try {
-      const response = await departmentService.getDepartments({
+      const response = await departmentService.findDepartmentsByPage({
         page: currentPage - 1,
         size: 5,
       });

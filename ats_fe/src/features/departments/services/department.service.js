@@ -1,10 +1,13 @@
 import axiosClient from "../../../shared/services/axiosClient";
 
 const departmentService = {
-    getDepartments: async ({ page, size }) => {
+    findDepartmentsByPage: async ({ page, size }) => {
         return axiosClient.get("/api/v1/departments", {
             params: { pageIndex: page, pageSize: size }
         });
+    },
+    findAllDepartments: async () => {
+        return axiosClient.get("/api/v1/departments/all");
     },
     createDepartment: async (departmentData) => {
         return axiosClient.post("/api/v1/departments", departmentData);
