@@ -6,14 +6,17 @@ import lombok.RequiredArgsConstructor;
 import org.ats.features.department.dto.DepartmentDto;
 import org.ats.features.department.dto.PageResponse;
 import org.ats.features.department.service.DepartmentService;
+import org.ats.utils.ApiPath;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController // Spring Bean --> Container
-@RequestMapping("/api/v1/departments")
+@RequestMapping(ApiPath.DEPARTMENTS)
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class DepartmentController {
@@ -46,6 +49,11 @@ public class DepartmentController {
         departmentService.delete(id);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/all")
+    public List<DepartmentDto> getAllDepartments() {
+        return departmentService.findAll();
     }
 
 }

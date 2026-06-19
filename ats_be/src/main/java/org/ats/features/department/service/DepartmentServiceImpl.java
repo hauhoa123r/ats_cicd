@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.ats.exception.DepartmentInvalidException;
 import org.ats.features.department.dto.DepartmentDto;
 import org.ats.features.department.dto.PageResponse;
+import org.ats.features.department.mapper.DepartmentMapper;
 import org.ats.features.department.repository.DepartmentRepository;
 import org.ats.features.entities.Department;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
-
+    private final DepartmentMapper departmentMapper;
     private final DepartmentRepository departmentRepository;
 
     @Transactional
@@ -87,6 +88,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         });
 
         departmentRepository.delete(department);
+    }
+
+    @Override
+    public List<DepartmentDto> findAll() {
+
+        return departmentMapper.toResponse(departmentRepository.findAll());
     }
 
     private Department fromDto(DepartmentDto departmentRequest) {
