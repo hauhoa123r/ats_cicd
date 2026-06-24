@@ -1,7 +1,7 @@
 package org.ats.features.department.repository;
 
 import org.ats.features.department.dto.DepartmentResponse;
-import org.ats.features.entities.Department;
+import org.ats.entities.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

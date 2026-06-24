@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.ats.features.department.dto.DepartmentDto;
-import org.ats.features.department.dto.PageResponse;
+import org.ats.common.dto.PageResponse;
 import org.ats.features.department.service.DepartmentService;
 import org.ats.utils.ApiPath;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +51,7 @@ public class DepartmentController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/all")
+    @GetMapping("/public/all")
     public List<DepartmentDto> getAllDepartments() {
         return departmentService.findAll();
     }

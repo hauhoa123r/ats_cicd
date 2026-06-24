@@ -1,6 +1,6 @@
 package org.ats.features.jobs.repository;
 
-import org.ats.features.entities.Job;
+import org.ats.entities.Job;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

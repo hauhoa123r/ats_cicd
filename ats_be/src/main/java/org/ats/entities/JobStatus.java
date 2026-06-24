@@ -1,4 +1,4 @@
-package org.ats.features.entities;
+package org.ats.entities;
 
 public enum JobStatus {
     DRAFT, ACTIVE, INACTIVE

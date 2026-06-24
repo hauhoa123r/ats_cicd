@@ -1,4 +1,4 @@
-package org.ats.features.department.dto;
+package org.ats.common.dto;
 
 import lombok.*;
 

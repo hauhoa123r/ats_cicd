@@ -1,7 +1,7 @@
 package org.ats.features.department.mapper;
 
 import org.ats.features.department.dto.DepartmentDto;
-import org.ats.features.entities.Department;
+import org.ats.entities.Department;
 import org.mapstruct.Mapper;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.ats.features.entities;
+package org.ats.entities;
 
 import jakarta.persistence.*;
 import lombok.*;

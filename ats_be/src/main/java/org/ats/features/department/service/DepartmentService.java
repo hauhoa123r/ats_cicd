@@ -1,8 +1,8 @@
 package org.ats.features.department.service;
 
 import org.ats.features.department.dto.DepartmentDto;
-import org.ats.features.department.dto.PageResponse;
-import org.ats.features.entities.Department;
+import org.ats.common.dto.PageResponse;
+import org.ats.entities.Department;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

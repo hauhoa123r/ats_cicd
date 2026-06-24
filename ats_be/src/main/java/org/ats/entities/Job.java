@@ -1,4 +1,4 @@
-package org.ats.features.entities;
+package org.ats.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -58,4 +58,7 @@ public class Job extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "recruiter_id", referencedColumnName = "id")
     private User user;
+
+    @Column(name = "employment_type")
+    private String employmentType;
 }
