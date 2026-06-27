@@ -7,7 +7,7 @@ const departmentService = {
         });
     },
     findAllDepartments: async () => {
-        return axiosClient.get("/api/v1/departments/all");
+        return axiosClient.get("/api/v1/departments/public/all");
     },
     createDepartment: async (departmentData) => {
         return axiosClient.post("/api/v1/departments", departmentData);

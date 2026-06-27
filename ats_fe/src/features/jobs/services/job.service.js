@@ -228,10 +228,22 @@ const jobService = {
         return fetch("http://localhost:8080/departments");
     },
     getLocations: async () => {
-        return axiosClient.get("/api/v1/locations");
+        return axiosClient.get("/api/v1/locations/public");
     },
     getJobTypes: async () => {
         return jobTypes;
+    },
+    search: async (filters) => {
+        const params = {};
+        if (filters.keyword) params.keyword = filters.keyword;
+        if (filters.department && filters.department !== "ALL") params.departmentId = filters.department;
+        if (filters.location && filters.location !== "ALL") params.location = filters.location;
+        if (filters.jobType && filters.jobType !== "ALL") params.jobType = filters.jobType;
+        
+        // Ensure you have an instance of axios configured for your backend base URL
+        // If not using axiosClient, change to fetch or another HTTP client
+        const response = await axiosClient.get("/api/v1/jobs/public/search", { params });
+        return response.data;
     }
 };
 

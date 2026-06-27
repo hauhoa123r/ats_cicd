@@ -21,9 +21,9 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-  const login = (response) => {
-    setUser(response);
-    localStorage.setItem("user", JSON.stringify(response)); // Store user data in localStorage
+  const login = (userProfile) => {
+    setUser(userProfile);
+    localStorage.setItem("user", JSON.stringify(userProfile)); // Store user data in localStorage
   };
 
   const dataContext = { user };

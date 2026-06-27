@@ -79,10 +79,10 @@ const PublicSidebar = () => {
         </Navbar.Collapse>
         <div className="d-flex align-items-center gap-3">
           {user ? (
-            <span>Welcome, {user.email}</span>
+            <span>Welcome, {user.fullName}</span>
           ) : (
             <>
-              <Nav.Link href="#" className="text-secondary fw-medium">
+              <Nav.Link as={NavLink} to="/login" className="text-secondary fw-medium">
                 Login
               </Nav.Link>
               <Button

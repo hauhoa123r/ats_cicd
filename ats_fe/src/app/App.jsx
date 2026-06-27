@@ -1,5 +1,5 @@
 import react from "react";
-import CandidateLogin from "../features/auth/pages/CandidateLogin";
+import Login from "@/features/auth/pages/Login.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import jobRoutes from "@/features/jobs/routes";
 import publicRoutes from "@/features/public/routes";
@@ -12,8 +12,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Define your routes here */}
-        <Route path="/login" element={<CandidateLogin />} />
-        <Route path="/register" element={<CandidateLogin />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Login />} />
         {jobRoutes}
       
         {publicRoutes}

@@ -38,43 +38,23 @@ const ViewJobListPage = () => {
   console.log("filters", filters);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!keyword) {
-        setSearchResults(jobs);
-        return;
+    const timeoutId = setTimeout(async () => {
+      try {
+        const response = await jobService.search(filters);
+        // Depending on PageResponse structure, set data properly
+        // Assume response contains .content if it's a PageResponse from backend
+        setJobs(response.content || response);
+      } catch (error) {
+        console.error("Error searching jobs:", error);
+        // Fallback to static data if backend is not ready
+        setJobs([]);
       }
-
-      const lowerQuery = keyword.trim().toLowerCase();
-
-      setSearchResults(
-        jobs.filter(
-          (j) =>
-            j.title.toLowerCase().includes(lowerQuery) ||
-            j.category.toLowerCase().includes(lowerQuery) ||
-            j.skills.some((s) => s.toLowerCase().includes(lowerQuery)),
-        ),
-      );
     }, 500);
 
     return () => {
-      // Clear the timeout if the component unmounts or keyword changes before the timeout completes
       clearTimeout(timeoutId);
     };
-  }, [keyword, jobs]);
-
-  // Áp dụng filters vào searchResults (đã được debounce theo keyword)
-  let visibleJobs = searchResults;
-  if (filters.department !== "ALL") {
-    visibleJobs = visibleJobs.filter((j) => j.category === filters.department);
-  }
-  if (filters.location !== "ALL") {
-    visibleJobs = visibleJobs.filter((j) => j.location === filters.location);
-  }
-  if (filters.jobType !== "ALL") {
-    visibleJobs = visibleJobs.filter(
-      (j) => j.employmentType === filters.jobType,
-    );
-  }
+  }, [filters]);
 
   return (
     <>
@@ -86,7 +66,7 @@ const ViewJobListPage = () => {
         locations={locations}
         jobTypes={jobTypes}
       />
-      <ViewJobListPosting jobs={visibleJobs} />
+      <ViewJobListPosting jobs={jobs} />
     </>
   );
 };
