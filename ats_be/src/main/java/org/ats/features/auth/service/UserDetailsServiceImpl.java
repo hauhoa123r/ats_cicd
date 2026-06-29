@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ats.entities.Role;
 import org.ats.entities.User;
+import org.ats.features.auth.dto.CustomUserDetails;
 import org.ats.features.auth.repository.RoleRepository;
 import org.ats.features.auth.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,11 +33,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         List<Role> roles = roleRepository.findByUsers_Email(user.getEmail());
         List<GrantedAuthority> grantedAuthorities = roles.stream()
-                .map((role) -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+                .map((role) -> new SimpleGrantedAuthority("ROLE_"+role.getName())).collect(Collectors.toList());
 
         log.info("Loading user roles={}", grantedAuthorities);
 
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPasswordHash(), grantedAuthorities);
+        CustomUserDetails userDetails = new CustomUserDetails(user.getEmail(), user.getFullName(), user.getPasswordHash(), grantedAuthorities);
         return userDetails;
     }
 }

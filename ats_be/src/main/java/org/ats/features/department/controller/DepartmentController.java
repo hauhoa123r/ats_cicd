@@ -7,8 +7,8 @@ import org.ats.features.department.dto.DepartmentDto;
 import org.ats.common.dto.PageResponse;
 import org.ats.features.department.service.DepartmentService;
 import org.ats.utils.ApiPath;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +17,12 @@ import java.util.Map;
 
 @RestController // Spring Bean --> Container
 @RequestMapping(ApiPath.DEPARTMENTS)
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class DepartmentController {
     private final DepartmentService departmentService;
 
     @GetMapping
+    @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<PageResponse<DepartmentDto>> getDepartment(@RequestParam(name = "pageIndex", required = false, defaultValue = "0") Integer pageIndex,
                                                                      @RequestParam(name = "pageSize", required = false, defaultValue = "5") Integer pageSize
     ) {
@@ -32,6 +32,7 @@ public class DepartmentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<?> create(@RequestBody @Valid DepartmentDto departmentRequest,
                                     BindingResult bindingResult
     ) {
@@ -45,6 +46,7 @@ public class DepartmentController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         departmentService.delete(id);
 

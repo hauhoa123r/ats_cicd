@@ -1,18 +1,18 @@
 import axiosClient from "@/shared/services/axiosClient";
 
 const authService = {
-  login: async (payload) => {
-    console.log("Login payload:", payload);
-    const response = axiosClient.post("/api/v1/auths/login", payload);
-    return response;
-
-    // Implementation for login
+  login: (payload) => {
+    return axiosClient.post("/api/v1/auths/login", payload);
   },
-  register: async (payload) => {
-    // Implementation for registration
+  register: (payload) => {
+    return axiosClient.post("/api/v1/auths/register", payload);
   },
-  logout: async () => {
-    // Implementation for logout
+  // Restore session from the httpOnly cookie on app load
+  me: () => {
+    return axiosClient.get("/api/v1/auths/me");
+  },
+  logout: () => {
+    return axiosClient.post("/api/v1/auths/logout");
   },
 };
 

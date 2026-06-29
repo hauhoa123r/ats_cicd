@@ -12,13 +12,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping(ApiPath.LOCATIONS)
-@CrossOrigin(origins = "http://localhost:3000")
 @Slf4j
 public class LocationController {
     @Value("#{'${locations}'.split(',')}") // SpEL
     private List<String> locations;
 
-    @GetMapping
+    @GetMapping("/public")
     public List<String> getLocations() {
         log.info("Getting locations {}", locations);
         return locations;

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interceptors for Beginners</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --soft_ink: #475569;
+      --muted: #94a3b8;
+      --brand: #2563eb;
+      --brand_dark: #1d4ed8;
+      --brand_tint: #eff4ff;
+      --line: #e6eaf0;
+      --code_bg: #0b1220;
+      --code_ink: #e6edf6;
+      --code_bar: #161f33;
+      --tip_bg: #ecfdf5;
+      --tip_line: #10b981;
+      --warn_bg: #fff7ed;
+      --warn_line: #f59e0b;
+      --radius: 14px;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    /* Header */
+    header.hero {
+      background:
+        radial-gradient(1200px 400px at 15% -10%, rgba(37, 99, 235, 0.18), transparent 60%),
+        linear-gradient(180deg, #0b1220 0%, #131c30 100%);
+      color: #f8fafc;
+      padding: 64px 24px 56px;
+      position: relative;
+    }
+    header.hero .wrap { max-width: 940px; margin: 0 auto; }
+    .pill {
+      display: inline-block;
+      font-size: 13px;
+      letter-spacing: 0.4px;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+    header.hero h1 {
+      margin: 0 0 12px;
+      font-size: 40px;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+    }
+    header.hero p {
+      margin: 0;
+      font-size: 19px;
+      color: #c7d2e2;
+      max-width: 660px;
+    }
+
+    /* Layout */
+    main {
+      max-width: 940px;
+      margin: -28px auto 72px;
+      padding: 0 24px;
+      position: relative;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 32px;
+      margin-bottom: 22px;
+    }
+
+    /* Table of contents */
+    .toc strong {
+      display: block;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .toc ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: toc;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 28px;
+    }
+    .toc li { counter-increment: toc; }
+    .toc a {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      color: var(--soft_ink);
+      text-decoration: none;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .toc a:hover { background: var(--brand_tint); color: var(--brand_dark); }
+    .toc a::before {
+      content: counter(toc, decimal-leading-zero);
+      color: var(--brand);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* Headings */
+    h2 {
+      font-size: 25px;
+      letter-spacing: -0.3px;
+      margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    h2 .num {
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--brand);
+      background: var(--brand_tint);
+      border-radius: 10px;
+    }
+    h3 { font-size: 18px; margin: 26px 0 10px; }
+    p { color: var(--soft_ink); margin: 0 0 14px; }
+    li { color: var(--soft_ink); }
+    ul { padding-left: 20px; }
+    ul li { margin: 6px 0; }
+
+    /* Code */
+    .code {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1f2a44;
+      margin: 16px 0 20px;
+    }
+    .code .bar {
+      background: var(--code_bar);
+      color: #9fb0c8;
+      font-size: 12.5px;
+      letter-spacing: 0.4px;
+      padding: 9px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #1f2a44;
+    }
+    .code .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+    .code .dot.r { background: #ef5350; }
+    .code .dot.y { background: #f7c948; }
+    .code .dot.g { background: #34d399; }
+    .code .name { margin-left: 8px; color: #c7d2e2; }
+    pre {
+      background: var(--code_bg);
+      color: var(--code_ink);
+      padding: 18px 20px;
+      margin: 0;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+    code { font-family: "SFMono-Regular", Consolas, Menlo, monospace; }
+    p code, li code, td code {
+      background: var(--brand_tint);
+      color: var(--brand_dark);
+      padding: 1px 7px;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 18px 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 15px;
+    }
+    th, td { text-align: left; padding: 12px 16px; vertical-align: top; }
+    thead th {
+      background: #f1f5fb;
+      color: var(--ink);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    tbody tr + tr td { border-top: 1px solid var(--line); }
+    tbody tr:nth-child(even) td { background: #fafbfd; }
+
+    /* Callouts */
+    .callout {
+      display: flex;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin: 20px 0;
+      font-size: 15px;
+    }
+    .callout .ico { font-size: 18px; line-height: 1.6; }
+    .callout.tip { background: var(--tip_bg); border: 1px solid #bbf7d0; }
+    .callout.tip .ico { color: var(--tip_line); }
+    .callout.warn { background: var(--warn_bg); border: 1px solid #fde2b3; }
+    .callout.warn .ico { color: var(--warn_line); }
+    .callout b { color: var(--ink); }
+    .callout p { margin: 0; color: var(--soft_ink); }
+
+    /* Flow steps */
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .flow .step {
+      background: var(--brand_tint);
+      border: 1px solid #dbe7ff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 14.5px;
+      color: var(--soft_ink);
+    }
+    .flow .step .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+
+    /* References */
+    .refs { list-style: none; padding: 0; margin: 0; }
+    .refs li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .refs li:last-child { border-bottom: none; }
+    .refs a { color: var(--brand); text-decoration: none; font-weight: 500; }
+    .refs a:hover { text-decoration: underline; }
+    .refs .src { display: block; color: var(--soft_ink); font-size: 15px; }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 8px 24px 48px;
+    }
+
+    @media (max-width: 640px) {
+      header.hero h1 { font-size: 30px; }
+      .toc ol { grid-template-columns: 1fr; }
+      .card { padding: 22px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <span class="pill">Study material for the ATS project</span>
+      <h1>Interceptors for Beginners</h1>
+      <p>A friendly guide to request and response interceptors in Spring Boot and Axios.</p>
+    </div>
+  </header>
+
+  <main>
+    <nav class="card toc" aria-label="Table of contents">
+      <strong>On this page</strong>
+      <ol>
+        <li><a href="#intro">What is an Interceptor</a></li>
+        <li><a href="#why">Why we use Interceptors</a></li>
+        <li><a href="#lifecycle">How an Interceptor works</a></li>
+        <li><a href="#backend">Backend Interceptor in Spring Boot</a></li>
+        <li><a href="#frontend">Frontend Interceptor in Axios</a></li>
+        <li><a href="#project">Applying it in this project</a></li>
+        <li><a href="#refresh">Refresh token with Axios</a></li>
+        <li><a href="#filter">Interceptor and Filter</a></li>
+        <li><a href="#bestpractice">Best practices</a></li>
+        <li><a href="#summary">Summary</a></li>
+        <li><a href="#references">References</a></li>
+      </ol>
+    </nav>
+
+    <section class="card" id="intro">
+      <h2><span class="num">1</span> What is an Interceptor</h2>
+      <p>
+        An interceptor is a small piece of code that sits in the middle of a request and a response.
+        It can read or change the data while the data travels to its target, and it can also act on the
+        data on the way back. Think of it as a checkpoint on a road. Every car that uses the road stops
+        at the checkpoint, gets a quick check, and then keeps going.
+      </p>
+      <p>
+        Interceptors live on both sides of a web app. On the server side, Spring Boot gives you a
+        <code>HandlerInterceptor</code> that runs before and after a controller handles a request. On the
+        client side, Axios gives you request interceptors and response interceptors that run around every
+        HTTP call the browser makes.
+      </p>
+      <div class="callout tip">
+        <span class="ico">&#9679;</span>
+        <p><b>Key idea.</b> An interceptor lets you run shared logic in one place, so you do not copy the
+        same code into every controller or every API call.</p>
+      </div>
+    </section>
+
+    <section class="card" id="why">
+      <h2><span class="num">2</span> Why we use Interceptors</h2>
+      <p>
+        Many tasks in an app are not part of the business logic, yet they need to happen on almost every
+        request. These shared tasks are a great fit for interceptors. Here are common examples.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Task</th><th>What the interceptor does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Logging</td><td>Record the method, the path, and the time taken for each request</td></tr>
+          <tr><td>Auth context</td><td>Attach a token or a credential before a call leaves the browser</td></tr>
+          <tr><td>Error handling</td><td>Catch a failed response in one place and react the same way every time</td></tr>
+          <tr><td>Auditing</td><td>Track who did what and when, without changing controller code</td></tr>
+          <tr><td>Timing</td><td>Measure how long a handler runs and flag slow requests</td></tr>
+        </tbody>
+      </table>
+      <p>
+        The main win is cleaner code. Without interceptors, the same logging line or the same token line
+        would show up in many places. With interceptors, that logic stays in one file and applies everywhere.
+      </p>
+    </section>
+
+    <section class="card" id="lifecycle">
+      <h2><span class="num">3</span> How an Interceptor works</h2>
+      <p>
+        An interceptor wraps the normal flow of a request. The request enters the interceptor first, then
+        moves on to the real handler, and finally the response passes back through the interceptor before it
+        reaches the caller. The steps below show the order.
+      </p>
+      <div class="flow">
+        <div class="step"><span class="tag">STEP 1</span>The caller sends a request</div>
+        <div class="step"><span class="tag">STEP 2</span>The interceptor checks or changes the request</div>
+        <div class="step"><span class="tag">STEP 3</span>The handler builds a response</div>
+        <div class="step"><span class="tag">STEP 4</span>The interceptor checks or changes the response</div>
+        <div class="step"><span class="tag">STEP 5</span>The caller gets the final response</div>
+      </div>
+      <p>
+        In Spring Boot the three hooks are named <code>preHandle</code>, <code>postHandle</code>, and
+        <code>afterCompletion</code>. The method <code>preHandle</code> runs before the controller. The
+        method <code>postHandle</code> runs after the controller but before the view is built. The method
+        <code>afterCompletion</code> runs at the very end, even when an error happened.
+      </p>
+    </section>
+
+    <section class="card" id="backend">
+      <h2><span class="num">4</span> Backend Interceptor in Spring Boot</h2>
+      <p>
+        To build an interceptor in Spring Boot, implement the <code>HandlerInterceptor</code> interface.
+        The example below measures how long each request takes and writes a log line. It saves the start
+        time on the request in <code>preHandle</code> and reads it back in <code>afterCompletion</code>.
+      </p>
+      <div class="code">
+        <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="name">LoggingInterceptor.java</span></div>
+<pre><code>package org.ats.common.interceptor;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+@Component
+@Slf4j
+public class LoggingInterceptor implements HandlerInterceptor {
+
+    private static final String START_TIME = "startTime";
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        request.setAttribute(START_TIME, System.currentTimeMillis());
+        log.info("Incoming request {} {}", request.getMethod(), request.getRequestURI());
+        return true; // return true to continue, return false to stop the request
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        long start = (Long) request.getAttribute(START_TIME);
+        long duration = System.currentTimeMillis() - start;
+        log.info("Completed {} {} with status {} in {} ms",
+                request.getMethod(), request.getRequestURI(), response.getStatus(), duration);
+    }
+}
+</code></pre>
+      </div>
+      <p>
+        Once the class exists, register it so Spring applies it to the routes you pick. Create a config class
+        that implements <code>WebMvcConfigurer</code> and add the interceptor to the registry. You can include
+        some paths and skip others.
+      </p>
+      <div class="code">
+        <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="name">WebMvcConfig.java</span></div>
+<pre><code>package org.ats.config;
+
+import lombok.RequiredArgsConstructor;
+import org.ats.common.interceptor.LoggingInterceptor;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@RequiredArgsConstructor
+public class WebMvcConfig implements WebMvcConfigurer {
+
+    private final LoggingInterceptor loggingInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(loggingInterceptor)
+                .addPathPatterns("/api/v1/**")
+                .excludePathPatterns("/api/v1/auths/**");
+    }
+}
+</code></pre>
+      </div>
+      <div class="callout warn">
+        <span class="ico">&#9888;</span>
+        <p><b>The return value matters.</b> When <code>preHandle</code> returns <code>true</code>, the request
+        moves on to the controller. When it returns <code>false</code>, the request stops and the controller
+        never runs. This is how an interceptor can block traffic when a check fails.</p>
+      </div>
+    </section>
+
+    <section class="card" id="frontend">
+      <h2><span class="num">5</span> Frontend Interceptor in Axios</h2>
+      <p>
+        Axios offers two kinds of interceptors. A request interceptor runs before the browser sends a call,
+        and a response interceptor runs after the server replies. The example below builds on the shared Axios
+        client already used in this project. The code uses plain function expressions so the flow is easy to read.
+      </p>
+      <div class="code">
+        <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="name">axiosClient.js</span></div>
+<pre><code>import axios from "axios";
+
+const BASE_URL = "http://localhost:8080";
+
+const axiosClient = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true,
+  timeout: 5000,
+});
+
+// Request interceptor: runs before every call leaves the browser
+axiosClient.interceptors.request.use(
+  function (config) {
+    console.log("Calling", config.method, config.url);
+    return config; // you must return config so the call can proceed
+  },
+  function (error) {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor: runs after every reply arrives
+axiosClient.interceptors.response.use(
+  function (response) {
+    return response; // pass a good response straight through
+  },
+  function (error) {
+    if (error.response && error.response.status === 401) {
+      // The session is missing or expired, so send the user to the login page
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default axiosClient;
+</code></pre>
+      </div>
+      <div class="callout warn">
+        <span class="ico">&#9888;</span>
+        <p><b>Always return.</b> A request interceptor must return the <code>config</code> object, and a
+        response interceptor must return the <code>response</code> object. If you forget to return, the call
+        gets stuck because the chain has nothing to pass along.</p>
+      </div>
+    </section>
+
+    <section class="card" id="project">
+      <h2><span class="num">6</span> Applying it in this project</h2>
+      <p>
+        This project keeps the access token inside an httpOnly cookie. The browser sends that cookie on its
+        own when <code>withCredentials</code> is <code>true</code>, so the frontend does not need a request
+        interceptor to add a token by hand. The most useful frontend interceptor here is the response
+        interceptor that reacts when a session expires.
+      </p>
+      <p>The setup we suggest is the following.</p>
+      <ul>
+        <li>
+          On the frontend, add a response interceptor on the Axios client. When the server replies with
+          status <code>401</code>, first try to renew the session with a refresh token (see the next
+          section), and only send the person to the login page if that renewal also fails. This keeps the
+          user signed in without any interruption.
+        </li>
+        <li>
+          On the backend, add a <code>LoggingInterceptor</code> for every route under <code>/api/v1</code>.
+          This gives a steady record of the method, the path, the status, and the time taken.
+        </li>
+        <li>
+          Keep the login check itself inside the existing <code>JwtAuthenticationFilter</code>. A filter is a
+          better home for security than an interceptor, because a filter runs earlier in the chain. The next
+          section explains the difference.
+        </li>
+      </ul>
+    </section>
+
+    <section class="card" id="refresh">
+      <h2><span class="num">7</span> Refresh token with Axios</h2>
+      <p>
+        A good security setup gives the access token a short life, for example fifteen minutes. When it
+        expires, the user should not be forced to log in again. Instead the app quietly asks the server for
+        a new access token using a second, longer lived token called a refresh token. A response interceptor
+        is the perfect place to run this renewal, because it can catch the <code>401</code> reply, fetch a
+        fresh token, and replay the original call. The user sees nothing.
+      </p>
+
+      <h3>How the flow works</h3>
+      <div class="flow">
+        <div class="step"><span class="tag">STEP 1</span>A normal call returns <code>401</code> because the access token expired</div>
+        <div class="step"><span class="tag">STEP 2</span>The interceptor calls the refresh endpoint, which reads the refresh cookie</div>
+        <div class="step"><span class="tag">STEP 3</span>The server checks the refresh token, rotates it, and sets new cookies</div>
+        <div class="step"><span class="tag">STEP 4</span>The interceptor replays the original call, now with a valid token</div>
+        <div class="step"><span class="tag">STEP 5</span>If the refresh also fails, the app sends the user to the login page</div>
+      </div>
+
+      <div class="callout tip">
+        <span class="ico">&#9679;</span>
+        <p><b>Cookies carry the tokens.</b> In this project both the access token and the refresh token are
+        httpOnly cookies. The browser sends them on its own, so the interceptor never reads or writes a token
+        by hand. It only needs to call the refresh endpoint and replay the original request.</p>
+      </div>
+
+      <h3>Three problems to handle</h3>
+      <p>A refresh interceptor looks simple, but three cases must be handled with care.</p>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>How to solve it</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Endless loop</td>
+            <td>Mark the retried request with a flag such as <code>_retry</code>, and never run the refresh
+            logic for the refresh call itself or for the login call.</td>
+          </tr>
+          <tr>
+            <td>Many calls fail at once</td>
+            <td>If several requests get <code>401</code> together, refresh only once. Hold the other requests
+            in a small queue and replay them after the single refresh finishes. This is called the single
+            flight pattern.</td>
+          </tr>
+          <tr>
+            <td>Refresh itself fails</td>
+            <td>The refresh token is expired or revoked. Clear the saved user and send the person to the
+            login page.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Example interceptor</h3>
+      <p>
+        The example below uses the single flight pattern. While one refresh call is running, every other
+        failed request waits in a queue. When the refresh succeeds, all waiting requests are replayed. When
+        it fails, they are all rejected and the user is sent to the login page.
+      </p>
+      <div class="code">
+        <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="name">axiosClient.js</span></div>
+<pre><code>import axios from "axios";
+
+const BASE_URL = "http://localhost:8080";
+
+const axiosClient = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true, // send the httpOnly access and refresh cookies
+  timeout: 5000,
+});
+
+// Single flight state: one shared refresh call serves many failed requests
+let isRefreshing = false;
+let waitingQueue = []; // each item is { resolve, reject }
+
+function flushQueue(error) {
+  // When error is null the refresh worked, so wake up every waiting request.
+  // Otherwise reject them all so the callers can handle the failure.
+  waitingQueue.forEach(function (item) {
+    if (error) {
+      item.reject(error);
+    } else {
+      item.resolve();
+    }
+  });
+  waitingQueue = [];
+}
+
+axiosClient.interceptors.response.use(
+  function (response) {
+    return response;
+  },
+  function (error) {
+    const original = error.config;
+    const status = error.response ? error.response.status : null;
+
+    // Never refresh the auth calls themselves, or we could loop forever
+    const isAuthCall =
+      original.url.indexOf("/api/v1/auths/login") !== -1 ||
+      original.url.indexOf("/api/v1/auths/refresh") !== -1;
+
+    // Only react to 401, and only retry a request once
+    if (status !== 401 || original._retry || isAuthCall) {
+      return Promise.reject(error);
+    }
+
+    original._retry = true;
+
+    // A refresh is already running: wait for it, then replay this request
+    if (isRefreshing) {
+      return new Promise(function (resolve, reject) {
+        waitingQueue.push({
+          resolve: function () {
+            resolve(axiosClient(original));
+          },
+          reject: reject,
+        });
+      });
+    }
+
+    // This request starts the single refresh call
+    isRefreshing = true;
+
+    return axiosClient
+      .post("/api/v1/auths/refresh")
+      .then(function () {
+        flushQueue(null);             // wake up the queued requests
+        return axiosClient(original); // replay the request that started the refresh
+      })
+      .catch(function (refreshError) {
+        flushQueue(refreshError);     // reject every waiting request
+        window.location.href = "/login"; // refresh failed, so log out
+        return Promise.reject(refreshError);
+      })
+      .finally(function () {
+        isRefreshing = false;
+      });
+  }
+);
+
+export default axiosClient;
+</code></pre>
+      </div>
+
+      <div class="callout warn">
+        <span class="ico">&#9888;</span>
+        <p><b>This is a teaching example.</b> Keep it readable and adapt it to your own state handling. The
+        important ideas are the same in every real version: react only to <code>401</code>, refresh once for
+        many requests, replay the waiting calls, and log out when the refresh fails.</p>
+      </div>
+
+      <h3>What the backend provides</h3>
+      <p>
+        The frontend code above relies on a backend that issues a refresh token at login and rotates it on
+        every refresh. In this project the server stores only the hash of each refresh token in the database,
+        marks the old token as revoked on every rotation, and revokes all of a user's tokens if a used token
+        appears again, which is a strong sign of theft. The endpoints are <code>POST /api/v1/auths/login</code>,
+        <code>POST /api/v1/auths/refresh</code>, and <code>POST /api/v1/auths/logout</code>.
+      </p>
+    </section>
+
+    <section class="card" id="filter">
+      <h2><span class="num">8</span> Interceptor and Filter</h2>
+      <p>
+        New developers often ask how an interceptor differs from a servlet filter, since both run around a
+        request. This table makes the line clear.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Point</th><th>Filter</th><th>Interceptor</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Belongs to</td><td>The servlet container</td><td>The Spring MVC framework</td></tr>
+          <tr><td>Runs at</td><td>The outer edge, before Spring routes the request</td><td>Inside Spring, around the controller</td></tr>
+          <tr><td>Knows the handler</td><td>No, it sees the raw request and response</td><td>Yes, it receives the handler object</td></tr>
+          <tr><td>Good for</td><td>Security, encoding, the JWT check</td><td>Logging, auditing, timing, app level checks</td></tr>
+        </tbody>
+      </table>
+      <p>
+        In short, use a filter for low level needs such as security, and use an interceptor for needs that
+        benefit from knowing which controller will handle the request.
+      </p>
+    </section>
+
+    <section class="card" id="bestpractice">
+      <h2><span class="num">9</span> Best practices</h2>
+      <ul>
+        <li>Keep each interceptor focused on one job, so it stays easy to read and to test.</li>
+        <li>Never put heavy or blocking work inside an interceptor, since it runs on every request.</li>
+        <li>On the backend, point the interceptor at the right routes with include and exclude patterns.</li>
+        <li>On the frontend, always return the config or the response so the chain keeps going.</li>
+        <li>Do not write secrets such as raw tokens into log lines.</li>
+        <li>Prefer a filter for security and an interceptor for logging and timing.</li>
+      </ul>
+    </section>
+
+    <section class="card" id="summary">
+      <h2><span class="num">10</span> Summary</h2>
+      <p>
+        An interceptor is a checkpoint that runs around a request and a response. It is the right tool for
+        shared tasks such as logging, timing, and session handling, because it keeps that logic in one place.
+        Spring Boot gives you a <code>HandlerInterceptor</code> with the hooks <code>preHandle</code>,
+        <code>postHandle</code>, and <code>afterCompletion</code>. Axios gives you request and response
+        interceptors for the browser. In this project, a response interceptor renews the session with a
+        rotating refresh token when the access token expires, so the user stays signed in without any
+        interruption, while the security check stays inside the existing JWT filter.
+      </p>
+    </section>
+
+    <section class="card" id="references">
+      <h2><span class="num">11</span> References</h2>
+      <ul class="refs">
+        <li>
+          <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-config/interceptors.html" target="_blank" rel="noopener">Spring Framework Reference, Interceptors</a>
+          <span class="src">docs.spring.io</span>
+        </li>
+        <li>
+          <a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/HandlerInterceptor.html" target="_blank" rel="noopener">Spring API, HandlerInterceptor interface</a>
+          <span class="src">docs.spring.io javadoc</span>
+        </li>
+        <li>
+          <a href="https://www.baeldung.com/spring-mvc-handlerinterceptor" target="_blank" rel="noopener">Baeldung, Introduction to Spring MVC HandlerInterceptor</a>
+          <span class="src">baeldung.com</span>
+        </li>
+        <li>
+          <a href="https://axios-http.com/docs/interceptors" target="_blank" rel="noopener">Axios Documentation, Interceptors</a>
+          <span class="src">axios-http.com</span>
+        </li>
+        <li>
+          <a href="https://auth0.com/docs/secure/tokens/refresh-tokens/refresh-token-rotation" target="_blank" rel="noopener">Auth0, Refresh Token Rotation</a>
+          <span class="src">auth0.com</span>
+        </li>
+        <li>
+          <a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP, JSON Web Token Cheat Sheet</a>
+          <span class="src">cheatsheetseries.owasp.org</span>
+        </li>
+        <li>
+          <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview" target="_blank" rel="noopener">MDN Web Docs, An overview of HTTP</a>
+          <span class="src">developer.mozilla.org</span>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    Prepared as study material for the ATS project. Spring Boot and Axios interceptors.
+  </footer>
+</body>
+</html>
