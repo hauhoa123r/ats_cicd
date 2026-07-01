@@ -70,7 +70,8 @@ public class RefreshTokenService {
      * @throws BadCredentialsException when the token is missing, expired, or revoked
      */
     @Transactional
-    public TokenRefreshResult rotate(String rawToken) {
+    public TokenRefreshResult rotate(String rawToken) { // refresh
+
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hash(rawToken))
                 .orElseThrow(() -> new BadCredentialsException("Invalid refresh token"));
 

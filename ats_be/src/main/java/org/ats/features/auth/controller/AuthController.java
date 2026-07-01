@@ -1,5 +1,7 @@
 package org.ats.features.auth.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 
@@ -68,8 +65,8 @@ public class AuthController {
             String refreshToken = refreshTokenService.createToken(userDetails.getUsername());
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(accessToken, Duration.ofMillis(accessExpirationMs)).toString())
-                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(refreshToken, Duration.ofMillis(refreshExpirationMs)).toString())
+                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(JwtAuthenticationFilter.ACCESS_TOKEN_COOKIE, accessToken, Duration.ofMillis(accessExpirationMs)).toString())
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(REFRESH_TOKEN_COOKIE, refreshToken, Duration.ofMillis(refreshExpirationMs)).toString())
                     .body(toProfile(userDetails));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -85,7 +82,10 @@ public class AuthController {
      */
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(
-            @CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
+            @CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken, @RequestHeader(name = "X-Correlation-ID") String userId) {
+
+        log.info("Refresh attempt for email={}", userId);
+
         if (refreshToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -96,16 +96,17 @@ public class AuthController {
             CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(result.email());
             String newAccessToken = jwtService.generateAccessToken(userDetails);
 
+
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(newAccessToken, Duration.ofMillis(accessExpirationMs)).toString())
-                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(result.refreshToken(), Duration.ofMillis(refreshExpirationMs)).toString())
+                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(JwtAuthenticationFilter.ACCESS_TOKEN_COOKIE, newAccessToken, Duration.ofMillis(accessExpirationMs)).toString())
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(REFRESH_TOKEN_COOKIE, result.refreshToken(), Duration.ofMillis(refreshExpirationMs)).toString())
                     .body(toProfile(userDetails));
         } catch (AuthenticationException e) {
             // Refresh token invalid/expired/revoked -> clear both cookies so the FE logs out cleanly.
             log.warn("Refresh failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie("", Duration.ZERO).toString())
-                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie("", Duration.ZERO).toString())
+                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(JwtAuthenticationFilter.ACCESS_TOKEN_COOKIE, "", Duration.ZERO).toString())
+                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(REFRESH_TOKEN_COOKIE, "", Duration.ZERO).toString())
                     .build();
         }
     }
@@ -130,13 +131,13 @@ public class AuthController {
             @CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
         refreshTokenService.revoke(refreshToken);
         return ResponseEntity.noContent()
-                .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie("", Duration.ZERO).toString())
-                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie("", Duration.ZERO).toString())
+                .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(JwtAuthenticationFilter.ACCESS_TOKEN_COOKIE, "", Duration.ZERO).toString())
+                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(REFRESH_TOKEN_COOKIE, "", Duration.ZERO).toString())
                 .build();
     }
 
-    private ResponseCookie buildAccessTokenCookie(String value, Duration maxAge) {
-        return ResponseCookie.from(JwtAuthenticationFilter.ACCESS_TOKEN_COOKIE, value)
+    private ResponseCookie buildAccessTokenCookie(String name, String value, Duration maxAge) {
+        return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(false) // TODO: set true in production (HTTPS) and use SameSite=None for cross-site
                 .sameSite("Lax")
@@ -145,8 +146,8 @@ public class AuthController {
                 .build();
     }
 
-    private ResponseCookie buildRefreshTokenCookie(String value, Duration maxAge) {
-        return ResponseCookie.from(REFRESH_TOKEN_COOKIE, value)
+    private ResponseCookie buildRefreshTokenCookie(String name, String value, Duration maxAge) {
+        return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(false) // TODO: set true in production (HTTPS)
                 .sameSite("Lax")
