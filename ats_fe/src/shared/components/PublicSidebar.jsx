@@ -1,10 +1,10 @@
-import React, { useContext } from "react";
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import { useContext } from "react";
+import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { AuthContext } from "../../app/providers/AuthProvider";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const PublicSidebar = () => {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const activeStyle = ({ isActive }) =>
     isActive
       ? "fw-semibold px-0 active text-dark border-bottom border-2"
@@ -18,6 +18,7 @@ const PublicSidebar = () => {
   //     }
   //     return "text-secondary";
   //   };
+
 
   return (
     <Navbar expand="lg" bg="white" className="border-bottom py-3">
@@ -44,11 +45,7 @@ const PublicSidebar = () => {
             <Nav.Link as={NavLink} to="/" className={activeStyle}>
               Home
             </Nav.Link>
-            <Nav.Link
-              as={NavLink}
-              to="/abouts"
-              className={activeStyle}
-            >
+            <Nav.Link as={NavLink} to="/abouts" className={activeStyle}>
               About Us
             </Nav.Link>
             <Nav.Link
@@ -77,7 +74,49 @@ const PublicSidebar = () => {
             </Nav.Link>
           </Nav>
         </Navbar.Collapse>
-        <div className="d-flex align-items-center gap-3">
+        {user ? (
+          <Nav>
+            <NavDropdown
+              id="nav-dropdown-dark-example"
+              title={user ? user.fullName : "Account"}
+              menuVariant="dark"
+            >
+              <NavDropdown.Item href="#action/3.1" as={NavLink} to="/profile">
+                Profile
+              </NavDropdown.Item>
+              <NavDropdown.Item href="#action/3.2" as={NavLink} to="/settings">
+                Settings
+              </NavDropdown.Item>
+              <NavDropdown.Item href="#action/3.3" as={NavLink} to="/help">
+                Help
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item href="#action/3.4" onClick={() => logout()}>
+                Logout
+              </NavDropdown.Item>
+            </NavDropdown>
+          </Nav>
+        ) : (
+          <>
+            <Nav.Link
+              as={NavLink}
+              to="/login"
+              className="text-secondary fw-medium me-3"
+            >
+              Login
+            </Nav.Link>
+            <Nav.Link
+              as={NavLink}
+              to="/register"
+              className="text-white px-3 py-2 rounded-2 fw-medium"
+              style={{ backgroundColor: "#4A3AFF" }}
+            >
+              Sign Up
+            </Nav.Link>
+          </>
+        )}
+        {/* <div className="d-flex align-items-center gap-3">
+          
           {user ? (
             <span>Welcome, {user.fullName}</span>
           ) : (
@@ -93,7 +132,7 @@ const PublicSidebar = () => {
               </Button>
             </>
           )}
-        </div>
+        </div> */}
       </Container>
     </Navbar>
   );

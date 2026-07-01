@@ -14,6 +14,9 @@ const authService = {
   logout: () => {
     return axiosClient.post("/api/v1/auths/logout");
   },
+  refreshToken: () => {
+    return axiosClient.post("/api/v1/auths/refresh");
+  }
 };
 
 export default authService;

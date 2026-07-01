@@ -4,6 +4,8 @@ import jobRoutes from "@/features/jobs/routes";
 import publicRoutes from "@/features/public/routes";
 import AdminManageDepartmentPage from "@/features/departments/pages/AdminManageDepartmentPage.jsx";
 import PrivateRoute from "@/app/routes/PrivateRoute.jsx";
+import PublicLayout from "./layout/PublicLayout";
+import UserProfile from "@/features/auth/components/UserProfile";
 function App() {
   return (
     <BrowserRouter>
@@ -20,8 +22,18 @@ function App() {
             path="/management/department"
             element={<AdminManageDepartmentPage />}
           />
+          
         </Route>
-      </Routes>
+
+        <Route element={<PrivateRoute allowedRoles={["ROLE_ADMIN", "ROLE_RECRUITER", "ROLE_CANDIDATE"]} />}>
+          <Route
+            path="/profile"
+            element={<PublicLayout />}>
+              <Route index element={<UserProfile />} />
+          </Route>
+          </Route>
+
+      </Routes> 
     </BrowserRouter>
   );
 }

@@ -8,16 +8,21 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true); // true until session check completes
 
   useEffect(() => {
+
     // The accessToken is an httpOnly cookie (not readable by JS).
     // Ask the backend who we are; if the cookie is valid we restore the session.
     let active = true;
 
     (async () => {
       try {
-        const { data } = await authService.me();
+        const user = localStorage.getItem("user");
+        console.log("Restoring session from localStorage:", user);
+        // const { data } = await authService.me();
         if (active) {
-          setUser(data);
-          localStorage.setItem("user", JSON.stringify(data));
+          setUser(user ? JSON.parse(user) : null);
+         
+          console.log("Session restored:", user);
+          // localStorage.setItem("user", JSON.stringify(data));
         }
       } catch {
         if (active) {
