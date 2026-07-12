@@ -80,7 +80,7 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "https://ats.fpt.vn"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000", "https://ats.fpt.vn", "http://localhost:1122"));
         corsConfiguration.setAllowCredentials(true);// Cho phép/ mọi request đính kèm cookie
 
         UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();

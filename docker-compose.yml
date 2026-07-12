@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: ats_database
+    build:
+      context: ./ats_db
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_DB: ats_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devhoa
+    volumes:
+      - my_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ats_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    image: ats_be
+    build:
+      context: ./ats_be
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      EXPIRATION_TIME: ${EXPIRATION_TIME}
+      REFRESH_EXPIRATION_TIME: ${REFRESH_EXPIRATION_TIME:-604800000}
+      SECRET_KEY: ${SECRET_KEY}
+      LOCATIONS: ${LOCATIONS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - my_network
+    restart: unless-stopped
+
+  nginx:
+    image: ats_fe
+    build:
+      context: ./ats_fe
+      dockerfile: Dockerfile
+    ports:
+      - "1122:80"
+    depends_on:
+      - backend
+    networks:
+      - my_network
+    restart: unless-stopped
+
+volumes:
+  my_data:
+
+networks:
+  my_network:
+    driver: bridge
