@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -43,7 +44,6 @@ pipeline {
                     )
                 ]) {
                     sh 'echo "$DOCKER_TOKEN" | docker login --username "$DOCKER_USERNAME" --password-stdin'
-
                     sh 'docker compose push'
                 }
             }
@@ -67,45 +67,21 @@ pipeline {
 
                         sh 'ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts"'
 
-                        sh '''
-                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
-                            "echo SSH connection successful"
-                        '''
+                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "echo SSH connection successful"'
 
-                        sh '''
-                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
-                            "test -d '$DEPLOY_PATH'"
-                        '''
+                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "test -d \'$DEPLOY_PATH\'"'
 
-                        sh '''
-                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
-                            "cd '$DEPLOY_PATH' && pwd"
-                        '''
+                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && pwd"'
 
-                        sh '''
-                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
-                            "cd '$DEPLOY_PATH' && test -f docker-compose.yml"
-                        '''
+                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && test -f docker-compose.yml"'
 
-                        sh '''
-                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
-                            "cd '$DEPLOY_PATH' && test -f .env"
-                        '''
+                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && test -f .env"'
 
-                        sh '''
-                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
-                            "cd '$DEPLOY_PATH' && docker compose --env-file .env pull"
-                        '''
+                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && docker compose --env-file .env pull"'
 
-                        sh '''
-                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
-                            "cd '$DEPLOY_PATH' && docker compose --env-file .env up -d"
-                        '''
+                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && docker compose --env-file .env up -d"'
 
-                        sh '''
-                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
-                            "cd '$DEPLOY_PATH' && docker compose --env-file .env ps"
-                        '''
+                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && docker compose --env-file .env ps"'
                     }
                 }
             }
@@ -126,3 +102,4 @@ pipeline {
         }
     }
 }
+```
