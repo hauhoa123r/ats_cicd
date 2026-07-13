@@ -39,19 +39,9 @@ pipeline {
                         )
                     ]) {
                         sh 'chmod 600 "$SSH_KEY"'
-
-                        sh 'mkdir -p "$HOME/.ssh"'
-
-                        sh 'chmod 700 "$HOME/.ssh"'
-
-                        sh 'ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts"'
-
-                        sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "echo SSH connection successful"'
-
+                        sh 'mkdir -p "$HOME/.ssh" && ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts"'
                         sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && docker compose --env-file .env pull"'
-
                         sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && docker compose --env-file .env up -d"'
-
                         sh 'ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" "cd \'$DEPLOY_PATH\' && docker compose --env-file .env ps"'
                     }
                 }
