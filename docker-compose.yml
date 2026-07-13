@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: ats_database
+    image: devhoa/ats-database:latest
     build:
       context: ./ats_db
       dockerfile: Dockerfile
@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: ats_be
+    image: devhoa/ats-backend:latest
     build:
       context: ./ats_be
       dockerfile: Dockerfile
@@ -40,7 +40,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: ats_fe
+    image: devhoa/ats-frontend:latest
     build:
       context: ./ats_fe
       dockerfile: Dockerfile
