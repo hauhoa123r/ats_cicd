@@ -7,26 +7,6 @@ pipeline {
     }
 
     stages {
-        stage('CHECK_ENVIRONMENT') {
-            steps {
-                sh 'echo "User: $(whoami)"'
-                sh 'echo "Workspace: $(pwd)"'
-                sh 'git --version'
-                sh 'docker --version'
-                sh 'docker compose version'
-            }
-        }
-
-        stage('CHECK_SOURCE') {
-            steps {
-                sh 'test -d ats_be'
-                sh 'test -d ats_fe'
-                sh 'test -d ats_db'
-                sh 'test -f docker-compose.yml'
-                sh 'echo "Source code is valid"'
-            }
-        }
-
         stage('BUILD_IMAGE') {
             steps {
                 sh 'docker compose build'
