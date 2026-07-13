@@ -45,7 +45,7 @@ services:
       context: ./ats_fe
       dockerfile: Dockerfile
     ports:
-      - "1122:80"
+      - "80:80"
     depends_on:
       - backend
     networks:
