@@ -9,35 +9,27 @@ pipeline {
     stages {
         stage('CHECK_ENVIRONMENT') {
             steps {
-                sh '''
-                    echo "User: $(whoami)"
-                    echo "Workspace: $(pwd)"
-
-                    git --version
-                    docker --version
-                    docker compose version
-                '''
+                sh 'echo "User: $(whoami)"'
+                sh 'echo "Workspace: $(pwd)"'
+                sh 'git --version'
+                sh 'docker --version'
+                sh 'docker compose version'
             }
         }
 
         stage('CHECK_SOURCE') {
             steps {
-                sh '''
-                    test -d ats_be
-                    test -d ats_fe
-                    test -d ats_db
-                    test -f docker-compose.yml
-
-                    echo "Source code is valid"
-                '''
+                sh 'test -d ats_be'
+                sh 'test -d ats_fe'
+                sh 'test -d ats_db'
+                sh 'test -f docker-compose.yml'
+                sh 'echo "Source code is valid"'
             }
         }
 
         stage('BUILD_IMAGE') {
             steps {
-                sh '''
-                    docker compose build
-                '''
+                sh 'docker compose build'
             }
         }
 
@@ -50,13 +42,9 @@ pipeline {
                         passwordVariable: 'DOCKER_TOKEN'
                     )
                 ]) {
-                    sh '''
-                        echo "$DOCKER_TOKEN" | docker login \
-                            --username "$DOCKER_USERNAME" \
-                            --password-stdin
+                    sh 'echo "$DOCKER_TOKEN" | docker login --username "$DOCKER_USERNAME" --password-stdin'
 
-                        docker compose push
-                    '''
+                    sh 'docker compose push'
                 }
             }
         }
@@ -71,22 +59,52 @@ pipeline {
                             usernameVariable: 'SSH_USER'
                         )
                     ]) {
-                        sh '''
-                            chmod 600 "$SSH_KEY"
-                            install -d -m 700 "$HOME/.ssh"
+                        sh 'chmod 600 "$SSH_KEY"'
 
-                            ssh \
-                                -o BatchMode=yes \
-                                -o ConnectTimeout=15 \
-                                -o StrictHostKeyChecking=accept-new \
-                                -i "$SSH_KEY" \
-                                "$SSH_USER@$SERVER_IP" \
-                                "cd '$DEPLOY_PATH' &&
-                                 test -f docker-compose.yml &&
-                                 test -f .env &&
-                                 docker compose --env-file .env pull &&
-                                 docker compose --env-file .env up -d &&
-                                 docker compose --env-file .env ps"
+                        sh 'mkdir -p "$HOME/.ssh"'
+
+                        sh 'chmod 700 "$HOME/.ssh"'
+
+                        sh 'ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts"'
+
+                        sh '''
+                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
+                            "echo SSH connection successful"
+                        '''
+
+                        sh '''
+                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
+                            "test -d '$DEPLOY_PATH'"
+                        '''
+
+                        sh '''
+                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
+                            "cd '$DEPLOY_PATH' && pwd"
+                        '''
+
+                        sh '''
+                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
+                            "cd '$DEPLOY_PATH' && test -f docker-compose.yml"
+                        '''
+
+                        sh '''
+                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
+                            "cd '$DEPLOY_PATH' && test -f .env"
+                        '''
+
+                        sh '''
+                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
+                            "cd '$DEPLOY_PATH' && docker compose --env-file .env pull"
+                        '''
+
+                        sh '''
+                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
+                            "cd '$DEPLOY_PATH' && docker compose --env-file .env up -d"
+                        '''
+
+                        sh '''
+                            ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" 
+                            "cd '$DEPLOY_PATH' && docker compose --env-file .env ps"
                         '''
                     }
                 }
